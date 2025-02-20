@@ -3,7 +3,9 @@ import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -33,7 +35,7 @@ android {
         release {
             buildConfigField("String", "API_KEY", "\"$apiKey\"")
             buildConfigField("String", "BASE_URL", "\"https://newsapi.org\"")
-            isMinifyEnabled = false
+            isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -41,22 +43,30 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
-    }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
-    buildFeatures {
-        compose = true
+        isCoreLibraryDesugaringEnabled = true
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.9"
+    }
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_11.toString()
+    }
+    buildFeatures {
+        compose = true
+        buildConfig = true
     }
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
     }
 }
 
@@ -71,11 +81,18 @@ dependencies {
     // Icon
     implementation(libs.androidx.material.icons.extended)
 
+    // paging
+    implementation(libs.bundles.pagin)
+
     // Coin
     implementation(libs.coil.compose)
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
+
+    // Destination
+    implementation(libs.compose.destinations)
+    ksp(libs.compose.destinations.ksp)
 
     // LifeCycle
     implementation(libs.bundles.lifecycle)
@@ -101,17 +118,26 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 
     // Pagination
-
+    implementation(libs.bundles.pagin)
 
     // BOM
     implementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(platform(libs.androidx.compose.bom))
 
     // Test
+    testImplementation(kotlin("test"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
-    debugImplementation(libs.androidx.compose.ui.tooling)
-    debugImplementation(libs.androidx.compose.ui.test.manifest)
+    debugImplementation(libs.bundles.compose.debug)
+
+    // Desugaring
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
+
+    // Testing
+    testImplementation(libs.bundles.junit)
+    testImplementation(libs.bundles.mockk)
+    testImplementation(libs.assertk)
+    testImplementation(libs.coroutines.test)
 }

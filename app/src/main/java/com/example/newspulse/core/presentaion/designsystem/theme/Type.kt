@@ -36,28 +36,42 @@ val Typography = Typography(
     bodySmall = TextStyle(
         fontFamily = robot,
         fontWeight = FontWeight.Normal,
-        fontSize = 12.sp,
-        lineHeight = 20.sp,
-        color = NewsPulseBlack
+        fontSize = 10.sp,
+        lineHeight = 18.sp
     ),
     bodyMedium = TextStyle(
         fontFamily = robot,
         fontWeight = FontWeight.Normal,
-        fontSize = 14.sp,
-        lineHeight = 22.sp,
-        color = NewsPulseBlack
+        fontSize = 12.sp,
+        lineHeight = 20.sp
     ),
     bodyLarge = TextStyle(
         fontFamily = robot,
         fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 22.sp
+    ),
+    titleSmall = TextStyle(
+        fontFamily = robot,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 22.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = robot,
+        fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
-        lineHeight = 24.sp,
-        color = NewsPulseBlack
+        lineHeight = 24.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = robot,
+        fontWeight = FontWeight.Medium,
+        fontSize = 18.sp,
+        lineHeight = 26.sp
     ),
     headlineMedium = TextStyle(
         fontFamily = robot,
         fontWeight = FontWeight.Bold,
-        fontSize = 24.sp,
-        color = NewsPulseBlack
+        fontSize = 24.sp
     )
 )

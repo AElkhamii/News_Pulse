@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">News Pulse</string>
+    <string name="arrow_back">Navigate back to home screen</string>
 </resources>

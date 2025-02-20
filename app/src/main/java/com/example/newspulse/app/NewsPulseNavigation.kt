@@ -1,5 +1,6 @@
 package com.example.newspulse.app
 
+import BreakingNewsScreenRoot
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -37,7 +38,7 @@ private fun NavGraphBuilder.bottomNavGraph(navController: NavHostController){
         route = "start",
         startDestination = "news"
     ){
-        composable(route = "news"){ Text(text = "news")}
+        composable(route = "news"){ BreakingNewsScreenRoot()}
         composable(route = "web"){ Text(text = "web")}
 
         composable(route = "save"){Text(text = "save")}
