@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class BreakingNewsResponse (
-    val articles: List<Article>? = null,
+    val articleResponses: List<ArticleResponse>? = null,
     val totalResult: Int? = null,
     val status: String? = null
 )

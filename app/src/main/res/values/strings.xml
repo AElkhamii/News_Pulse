@@ -7,7 +7,7 @@
     <string name="error_many_request">you hit your rate limit of requests.</string>
     <string name="error_no_internet">Couldn\'t reach server, please check your connection.</string>
     <string name="error_payload_too_large">the file that you\'re trying to upload is too large.</string>
-    <string name="error_server_error">Oops, somthing went wrong, please try agin.</string>
+    <string name="error_server_error">Oops, something went wrong, please try agin.</string>
     <string name="error_serialization">Oops, Couldn\'t parse data.</string>
     <string name="error_unknown">An unknown error occurred.</string>
     <string name="error_unauthorized">Unauthorized process</string>

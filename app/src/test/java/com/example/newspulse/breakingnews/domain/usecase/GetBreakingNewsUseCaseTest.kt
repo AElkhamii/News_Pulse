@@ -1,8 +1,8 @@
 package com.example.newspulse.breakingnews.domain.usecase
 
-import com.example.newspulse.breakingnews.data.remote.Article
+import com.example.newspulse.breakingnews.data.remote.ArticleResponse
 import com.example.newspulse.breakingnews.data.remote.BreakingNewsResponse
-import com.example.newspulse.breakingnews.data.remote.Source
+import com.example.newspulse.breakingnews.data.remote.SourceResponse
 import com.example.newspulse.breakingnews.domain.model.BreakingNewsArticle
 import com.example.newspulse.breakingnews.domain.model.BreakingNewsList
 import com.example.newspulse.breakingnews.domain.repo.BreakingNewsRepository
@@ -38,12 +38,12 @@ class GetBreakingNewsUseCaseTest {
         val pageSize = 20
         val page = 1
         //remote result
-        val remoteArticles = listOf(
-            Article(
+        val remoteArticleResponses = listOf(
+            ArticleResponse(
                 title = "Breaking: Major Event Happening Now!",
                 description = "Breaking: Major Event Happening Now!",
                 urlToImage = "https://www.example.com/image.jpg",
-                source = Source("MBC", "News Pulse"),
+                sourceResponse = SourceResponse("MBC", "News Pulse"),
                 publishedAt = "2025-02-18T12:00:00Z",
                 author = "John Doe",
                 urlToArticle = "https://www.example.com/article",
@@ -51,7 +51,7 @@ class GetBreakingNewsUseCaseTest {
             )
         )
         val stubRemoteBreakingNewsResponse = BreakingNewsResponse(
-            articles = remoteArticles,
+            articleResponses = remoteArticleResponses,
             totalResult = 1,
             status = "ok"
         )

@@ -4,7 +4,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class Article(
+data class ArticleResponse(
     val author: String?,
     val title: String,
     val description: String?,
@@ -12,7 +12,7 @@ data class Article(
     val urlToArticle: String,
     @SerialName("urlToImage")
     val urlToImage: String?,
-    val source: Source?,
+    val sourceResponse: SourceResponse?,
     val publishedAt: String,
     val content: String?
 )
