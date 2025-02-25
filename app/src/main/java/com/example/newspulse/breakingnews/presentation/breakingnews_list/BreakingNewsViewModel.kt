@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.newspulse.breakingnews.domain.usecase.CacheBreakingNewsUseCase
 import com.example.newspulse.breakingnews.domain.usecase.GetBreakingNewsUseCase
 import com.example.newspulse.core.domain.Constants
 import com.example.newspulse.core.domain.util.Result
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 class BreakingNewsViewModel(
-    private val getBreakingNewsUseCase: GetBreakingNewsUseCase
+    private val cacheBreakingNewsUseCase: CacheBreakingNewsUseCase,
+    private val getBreakingNewsUseCase: GetBreakingNewsUseCase,
 ):ViewModel() {
 
     var currentPage = Constants.FIRST_BREAKING_NEWS_PAGE
@@ -67,14 +69,14 @@ class BreakingNewsViewModel(
 
         currentPage = Constants.FIRST_BREAKING_NEWS_PAGE
         state = state.copy(isLoading = true, isLastPage = false)
-        getRemoteBrakingNews()
+        getBrakingNews()
     }
 
     private fun getMorePages(){
         if(state.isLoadingMore) return // Prevent multiple requests
 
         state = state.copy(isLoadingMore = true)
-        getRemoteBrakingNews()
+        getBrakingNews()
     }
 
     private fun getRefreshRequest(){
@@ -82,44 +84,55 @@ class BreakingNewsViewModel(
 
         currentPage = Constants.FIRST_BREAKING_NEWS_PAGE
         state = state.copy(isRefreshing = true, isLastPage = false)
-        getRemoteBrakingNews()
+        getBrakingNews()
     }
 
-    private fun getRemoteBrakingNews(){
+    private fun getBrakingNews(){
         viewModelScope.launch {
 
-            val result = getBreakingNewsUseCase(
+            val cashedResult = cacheBreakingNewsUseCase(
                 country = state.country,
                 category = state.category,
                 pageSize = state.pageSize.toInt(),
                 page = currentPage,
             )
-            when(result){
+
+            when(cashedResult){
                 is Result.Error -> {
-                    eventChannel.send(BreakingNewsEvent.Error(result.error.asUiText()))
+                    eventChannel.send(BreakingNewsEvent.Error(cashedResult.error.asUiText()))
                 }
                 is Result.Success -> {
-                    state = state.copy(isLastPage = result.data.articles.isEmpty())
+                    val result = getBreakingNewsUseCase()
+                    when(result){
+                        is Result.Error -> {
+                            eventChannel.send(BreakingNewsEvent.Error(result.error.asUiText()))
+                        }
+                        is Result.Success -> {
+                            state = state.copy(isLastPage = result.data.articles.isEmpty())
 
-                    state = if(state.isRefreshing || state.isLoading){
-                        state.copy(
-                            breakingNews = result.data
-                        )
-                    } else{
-                        state.copy(
-                            breakingNews = state.breakingNews.copy(
-                                articles = state.breakingNews.articles + result.data.articles
-                            )
-                        )
+                            state = if(state.isRefreshing || state.isLoading){
+                                state.copy(
+                                    breakingNews = result.data
+                                )
+                            } else{
+                                state.copy(
+                                    breakingNews = state.breakingNews.copy(
+                                        articles = state.breakingNews.articles + result.data.articles
+                                    )
+                                )
+                            }
+
+                            if(!state.isLastPage){
+                                currentPage++
+                            }
+
+                            eventChannel.send(BreakingNewsEvent.DataLoadedSuccessfully)
+                        }
                     }
-
-                    if(!state.isLastPage){
-                        currentPage++
-                    }
-
-                    eventChannel.send(BreakingNewsEvent.DataLoadedSuccessfully)
                 }
             }
+
+
 
             state = state.copy(isLoading = false, isLoadingMore = false, isRefreshing = false)
         }

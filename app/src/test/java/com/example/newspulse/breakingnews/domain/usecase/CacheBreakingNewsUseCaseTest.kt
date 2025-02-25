@@ -2,7 +2,7 @@ package com.example.newspulse.breakingnews.domain.usecase
 
 import com.example.newspulse.breakingnews.data.remote.ArticleResponse
 import com.example.newspulse.breakingnews.data.remote.BreakingNewsResponse
-import com.example.newspulse.breakingnews.data.remote.SourceResponse
+import com.example.newspulse.breakingnews.data.remote.Source
 import com.example.newspulse.breakingnews.domain.model.BreakingNewsArticle
 import com.example.newspulse.breakingnews.domain.model.BreakingNewsList
 import com.example.newspulse.breakingnews.domain.repo.BreakingNewsRepository
@@ -16,16 +16,16 @@ import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class GetBreakingNewsUseCaseTest {
+class CacheBreakingNewsUseCaseTest {
 
-    private lateinit  var getBreakingNewsUseCase: GetBreakingNewsUseCase
+    private lateinit  var cacheBreakingNewsUseCase: CacheBreakingNewsUseCase
     private lateinit  var repo: BreakingNewsRepository
 
     @BeforeEach
     fun setUp() {
         // Instantiation
         repo = mockk()
-        getBreakingNewsUseCase = GetBreakingNewsUseCase(repo)
+        cacheBreakingNewsUseCase = CacheBreakingNewsUseCase(repo)
     }
 
     // Given when then
@@ -43,7 +43,7 @@ class GetBreakingNewsUseCaseTest {
                 title = "Breaking: Major Event Happening Now!",
                 description = "Breaking: Major Event Happening Now!",
                 urlToImage = "https://www.example.com/image.jpg",
-                sourceResponse = SourceResponse("MBC", "News Pulse"),
+                sourceResponse = Source("MBC", "News Pulse"),
                 publishedAt = "2025-02-18T12:00:00Z",
                 author = "John Doe",
                 urlToArticle = "https://www.example.com/article",
@@ -71,10 +71,10 @@ class GetBreakingNewsUseCaseTest {
         val expectedResult = Result.Success(stubBreakingNewsList)
 
         //-> Mocking -- every for non coroutine function
-        coEvery { repo.getBreakingNewsResponse(country,category,pageSize,page) } returns Result.Success(stubRemoteBreakingNewsResponse)
+        coEvery { repo.getRemoteBreakingNewsResponse(country,category,pageSize,page) } returns Result.Success(stubRemoteBreakingNewsResponse)
 
         //Act
-        val actualResult = getBreakingNewsUseCase(country,category,pageSize,page)
+        val actualResult = cacheBreakingNewsUseCase(country,category,pageSize,page)
 
         //Assert
         assertEquals(expectedResult, actualResult)
@@ -87,9 +87,9 @@ class GetBreakingNewsUseCaseTest {
         val pageSize = 20
         val page = 1
 
-        coEvery { repo.getBreakingNewsResponse(country,category,pageSize,page) } returns Result.Error(DataError.Network.UNKNOWN)
+        coEvery { repo.getRemoteBreakingNewsResponse(country,category,pageSize,page) } returns Result.Error(DataError.Network.UNKNOWN)
 
-        val actualResult = getBreakingNewsUseCase(country,category,pageSize,page)
+        val actualResult = cacheBreakingNewsUseCase(country,category,pageSize,page)
 
         val expectedResult = Result.Error(DataError.Network.UNKNOWN)
 

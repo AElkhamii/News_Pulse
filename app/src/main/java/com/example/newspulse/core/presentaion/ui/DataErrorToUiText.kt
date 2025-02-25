@@ -8,6 +8,21 @@ fun DataError.asUiText(): UiText{
         DataError.Local.DISK_IS_FULL -> UiText.StringResource(
             R.string.error_disk_full
         )
+        DataError.Local.NO_DATA -> UiText.StringResource(
+            R.string.no_data
+        )
+        DataError.Local.DATA_CORRUPTED -> UiText.StringResource(
+            R.string.data_corrupted
+        )
+        DataError.Local.DATABASE_FAILURE -> UiText.StringResource(
+            R.string.database_faliure
+        )
+        DataError.Local.UNAUTHORIZED_ACCESS -> UiText.StringResource(
+            R.string.db_unauthorized_access
+        )
+        DataError.Local.CONCURRENT_MODIFICATION -> UiText.StringResource(
+            R.string.db_concurrent_modification
+        )
         DataError.Network.REQUEST_TIMEOUT -> UiText.StringResource(
             R.string.error_request_timeout
         )

@@ -1,15 +1,15 @@
 package com.example.newspulse.core.data.database.mapper
 
-import com.example.newspulse.breakingnews.data.remote.ArticleResponse
+import com.example.newspulse.breakingnews.domain.model.BreakingNewsArticle
 import com.example.newspulse.core.data.database.entities.BreakingNewsArticleEntity
 
-fun ArticleResponse.toBreakingNewsEntity(): BreakingNewsArticleEntity{
-    return BreakingNewsArticleEntity(
-        sourceName = sourceResponse?.name ?: "",
+fun BreakingNewsArticleEntity.toBreakingNewsArticle(): BreakingNewsArticle {
+    return BreakingNewsArticle(
+        sourceName = sourceName,
         author = author,
         title = title,
         description = description,
-        url = urlToArticle,
+        url = url,
         urlToImage = urlToImage,
         publishedAt = publishedAt
     )

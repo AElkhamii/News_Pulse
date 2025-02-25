@@ -12,7 +12,7 @@ data class ArticleResponse(
     val urlToArticle: String,
     @SerialName("urlToImage")
     val urlToImage: String?,
-    val sourceResponse: SourceResponse?,
+    val source: Source?,
     val publishedAt: String,
     val content: String?
 )
