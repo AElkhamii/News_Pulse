@@ -1,5 +1,4 @@
 package com.example.newspulse.core.presentaion.designsystem.components
-
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -14,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.newspulse.core.presentaion.designsystem.theme.Dimensions
 import com.example.newspulse.core.presentaion.designsystem.theme.LocalDimensions
-import com.example.newspulse.core.presentaion.designsystem.theme.Padding
 
 @Composable
 fun NewsPulseFavouriteButton(

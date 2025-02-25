@@ -1,9 +1,9 @@
 package com.example.newspulse.breakingnews.presentation.di
 
-import com.example.newspulse.breakingnews.presentation.BreakingNewsViewModel
-import org.koin.androidx.viewmodel.dsl.viewModelOf
+import com.example.newspulse.breakingnews.presentation.breakingnews_list.BreakingNewsViewModel
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val breakingNewsPresentationModule = module {
-    viewModelOf(::BreakingNewsViewModel)
+    viewModel { BreakingNewsViewModel(get()) }
 }

@@ -6,5 +6,10 @@ import com.example.newspulse.core.domain.errorwrapper.DataError
 import com.example.newspulse.core.domain.util.Result
 
 interface BreakingNewsRepository {
-    suspend fun getBreakingNewsResponse(country: String, category: String, pageSize: Int, page: Int, apiKey: String = BuildConfig.API_KEY): Result<BreakingNewsResponse, DataError.Network>
+    suspend fun getBreakingNewsResponse(
+        country: String,
+        category: String,
+        pageSize: Int,
+        page: Int
+    ): Result<BreakingNewsResponse, DataError.Network>
 }

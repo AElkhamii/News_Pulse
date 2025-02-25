@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.junit5)
 }
 
 android {
@@ -92,6 +93,10 @@ dependencies {
 
     // Destination
     implementation(libs.compose.destinations)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
+    testImplementation(libs.junit.jupiter)
     ksp(libs.compose.destinations.ksp)
 
     // LifeCycle
@@ -140,4 +145,5 @@ dependencies {
     testImplementation(libs.bundles.mockk)
     testImplementation(libs.assertk)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.slf4j.simple)
 }

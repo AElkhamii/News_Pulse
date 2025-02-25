@@ -1,12 +1,14 @@
 package com.example.newspulse.app
 
-import BreakingNewsScreenRoot
+import com.example.newspulse.breakingnews.presentation.breakingnews_list.BreakingNewsScreenRoot
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
@@ -15,6 +17,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.example.newspulse.core.presentaion.designsystem.theme.Dimensions
+import com.example.newspulse.core.presentaion.designsystem.theme.LocalDimensions
 import com.example.newspulse.core.presentaion.designsystem.theme.Navigation_News
 import com.example.newspulse.core.presentaion.designsystem.theme.Navigation_Save
 import com.example.newspulse.core.presentaion.designsystem.theme.Navigation_Search
@@ -38,7 +42,7 @@ private fun NavGraphBuilder.bottomNavGraph(navController: NavHostController){
         route = "start",
         startDestination = "news"
     ){
-        composable(route = "news"){ BreakingNewsScreenRoot()}
+        composable(route = "news"){ BreakingNewsScreenRoot(navController = navController) }
         composable(route = "web"){ Text(text = "web")}
 
         composable(route = "save"){Text(text = "save")}
@@ -48,8 +52,8 @@ private fun NavGraphBuilder.bottomNavGraph(navController: NavHostController){
 
 
 @Composable
-fun BottomNavigationBar (navController: NavHostController){
-    NavigationBar {
+fun BottomNavigationBar (navController: NavHostController, dimensions: Dimensions){
+    NavigationBar(modifier = Modifier.height(dimensions.bottomBarHeight)) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry?.destination?.route
 
@@ -101,6 +105,6 @@ fun BottomNavigationBar (navController: NavHostController){
 @Composable
 private fun BottomNavigationBarPreview () {
     NewsPulseTheme {
-        BottomNavigationBar(rememberNavController())
+        BottomNavigationBar(rememberNavController(), LocalDimensions.current)
     }
 }

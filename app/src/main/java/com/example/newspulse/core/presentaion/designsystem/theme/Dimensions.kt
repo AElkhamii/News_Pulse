@@ -14,9 +14,13 @@ data class Dimensions(
     val favouriteImageSize: Dp = 40.dp,
     val dividerThickness: Dp = 1.dp,
     val topBarHeight: Dp = 70.dp,
+    val bottomBarHeight: Dp = 100.dp,
     val tinyBoarderThickness: Dp = 1.dp,
     val itemHeight:Dp = 130.dp,
-    val progressBarSize:Dp = 100.dp
+    val progressBarSize:Dp = 100.dp,
+    val categoryHeight: Dp = 60.dp,
+    val categoryMenuHeightRange: Dp = 200.dp,
+    val filterBarHeight: Dp = 80.dp
 )
 
 val LocalDimensions = compositionLocalOf { Dimensions() }

@@ -14,6 +14,6 @@ sealed interface DataError: Error {
     }
 
     enum class Local: DataError{
-        DISK_IS_FILL,
+        DISK_IS_FULL,
     }
 }
