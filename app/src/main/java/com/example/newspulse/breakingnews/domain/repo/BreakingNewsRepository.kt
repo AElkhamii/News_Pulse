@@ -21,7 +21,7 @@ interface BreakingNewsRepository {
         page: Int
     ): EmptyResult<DataError>
 
-    suspend fun getCachedBreakingNewsList(): Result<List<BreakingNewsArticle>,DataError.Local>
+    suspend fun getCachedBreakingNewsList(pageSize: Int, offset: Int): Result<List<BreakingNewsArticle>,DataError.Local>
 
 
     suspend fun clearAllBreakingNewsEntity(): EmptyResult<DataError>

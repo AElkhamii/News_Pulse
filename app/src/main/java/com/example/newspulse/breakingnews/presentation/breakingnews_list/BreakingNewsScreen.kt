@@ -2,6 +2,8 @@
 
 package com.example.newspulse.breakingnews.presentation.breakingnews_list
 
+import android.content.Context
+import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,15 +16,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.pulltorefresh.PullToRefreshDefaults
-import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import com.example.newspulse.app.BottomNavigationBar
 import com.example.newspulse.breakingnews.domain.model.BreakingNewsArticle
+import com.example.newspulse.breakingnews.presentation.NetworkMonitor
 import com.example.newspulse.core.presentaion.designsystem.components.NewsPulseBackground
 import com.example.newspulse.core.presentaion.designsystem.theme.NewsPulseTheme
 import com.example.newspulse.core.domain.Constants
@@ -51,14 +65,8 @@ fun BreakingNewsScreenRoot(
 ) {
     val context = LocalContext.current
 
-    LaunchedEffect(
-        key1 = viewModel.state.country,
-        key2 = viewModel.state.category,
-        key3 = viewModel.state.pageSize,
-    ) {
-        viewModel.onAction(BreakingNewsAction.OnLoadingBreakingNews)
-    }
-    
+    HandleNetworkState(context, viewModel)
+
     ObserveAsEvent(
         flow = viewModel.event,
     ) {event ->
@@ -79,10 +87,11 @@ fun BreakingNewsScreenRoot(
             }
         }
     }
+
     BreakingNewsScreen(
         navController = navController,
         state = viewModel.state,
-        onAction = viewModel::onAction
+        onAction = viewModel::onAction,
     )
 }
 
@@ -90,10 +99,24 @@ fun BreakingNewsScreenRoot(
 private fun BreakingNewsScreen(
     navController: NavHostController,
     state: BreakingNewsState,
-    onAction: (BreakingNewsAction) -> Unit
+    onAction: (BreakingNewsAction) -> Unit,
 ) {
     val dimensions = LocalDimensions.current
     val padding = LocalPadding.current
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    var isReturningFromWeb  by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(
+        key1 = state.country,
+        key2 = state.category,
+        key3 = state.pageSize,
+    ) {
+        if (!isReturningFromWeb) {
+            onAction(BreakingNewsAction.OnLoadingBreakingNews)
+        }
+        isReturningFromWeb = false
+    }
 
     Scaffold(
         topBar = {
@@ -105,7 +128,13 @@ private fun BreakingNewsScreen(
                 onCategoryClick = {onAction(BreakingNewsAction.OnCategoryClick)}
             )
         },
-        bottomBar = { BottomNavigationBar(navController, dimensions) }
+        bottomBar = { BottomNavigationBar(navController, dimensions) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = { onAction(BreakingNewsAction.OnRefreshingBreakingNews) }) {
+                Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+            }
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) {innerPadding->
         NewsPulseBackground {
             Column (
@@ -124,6 +153,7 @@ private fun BreakingNewsScreen(
                         state = state
                     )
                 }
+
                 if(state.isLoading && !state.isRefreshing){
                     NewsPulseCircularProgressIndicator(
                         modifier = Modifier,
@@ -131,45 +161,43 @@ private fun BreakingNewsScreen(
                         padding = padding
                     )
                 }
-                LazyColumn(
+
+                PullToRefreshBox(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(start = padding.tinyPadding, end = padding.tinyPadding)
-                        .pullToRefresh(
-                            isRefreshing = state.isRefreshing,
-                            state = swipeRefreshState,
-                            enabled = true,
-                            threshold = PullToRefreshDefaults.PositionalThreshold,
-                            onRefresh = {onAction(BreakingNewsAction.OnRefreshingBreakingNews)}
-                        )
-                ){
-                    if (state.isRefreshing) {
-                        item {
-                            LoadMoreCircularProgressIndicator(padding = padding)
+                        .padding(start = padding.tinyPadding, end = padding.tinyPadding),
+                    isRefreshing = state.isRefreshing,
+                    onRefresh = { onAction(BreakingNewsAction.OnRefreshingBreakingNews) },
+                    state = swipeRefreshState
+                ) {
+                    LazyColumn{
+                        itemsIndexed(state.breakingNews.articles){index,article ->
+                            NewsPulseNewsItem(
+                                modifier = Modifier,
+                                padding = padding,
+                                dimensions = dimensions,
+                                imageUrl = article.urlToImage?:"",
+                                title = article.title,
+                                description = article.description?:"",
+                                source = article.sourceName,
+                                publishedAt = article.publishedAt,
+                                onFavouriteClick = {},
+                                onItemClick = {
+                                    val encodedUrl = Uri.encode(article.url) // Encode URL
+                                    navController.navigate("web/$encodedUrl") // Pass encoded URL
+                                    isReturningFromWeb = true
+                                },
+                            )
+                            // Detect when we reach the last item**
+                            if (index == state.breakingNews.articles.lastIndex && !state.isLoadingMore) { // && !state.isLastPage
+                                onAction(BreakingNewsAction.OnLoadingMoreBreakingNews)
+                            }
                         }
-                    }
-                    itemsIndexed(state.breakingNews.articles){index,article ->
-                        NewsPulseNewsItem(
-                            modifier = Modifier,
-                            padding = padding,
-                            dimensions = dimensions,
-                            imageUrl = article.urlToImage?:"",
-                            title = article.title,
-                            description = article.description?:"",
-                            source = article.sourceName,
-                            publishedAt = article.publishedAt,
-                            onFavouriteClick = {},
-                            onItemClick = {},
-                        )
-                        // Detect when we reach the last item**
-                        if (index == state.breakingNews.articles.lastIndex && !state.isLoadingMore && !state.isLastPage) {
-                            onAction(BreakingNewsAction.OnLoadingMoreBreakingNews)
-                        }
-                    }
-                    // Show Loading Indicator When Fetching More**
-                    if (state.isLoadingMore) {
-                        item {
-                            LoadMoreCircularProgressIndicator(padding = padding)
+                        // Show Loading Indicator When Fetching More**
+                        if (state.isLoadingMore) {
+                            item {
+                                LoadMoreCircularProgressIndicator(padding = padding)
+                            }
                         }
                     }
                 }
@@ -248,6 +276,29 @@ fun LoadMoreCircularProgressIndicator(
         CircularProgressIndicator(
             color = MaterialTheme.colorScheme.primary
         )
+    }
+}
+
+@Composable
+fun HandleNetworkState(context: Context, viewModel: BreakingNewsViewModel) {
+    var isConnected by remember { mutableStateOf(false) }
+    var wasPreviouslyOffline by remember { mutableStateOf(false) }
+
+    val networkMonitor = remember {
+        NetworkMonitor(context, onNetworkStatusChanged = { isOnline ->
+            if (isOnline && wasPreviouslyOffline) {
+                viewModel.onAction(BreakingNewsAction.OnRefreshingBreakingNews)
+            }
+            isConnected = isOnline
+            wasPreviouslyOffline = !isOnline
+        })
+    }
+
+    DisposableEffect(context) {
+        networkMonitor.register()
+        onDispose {
+            networkMonitor.unregister()
+        }
     }
 }
 

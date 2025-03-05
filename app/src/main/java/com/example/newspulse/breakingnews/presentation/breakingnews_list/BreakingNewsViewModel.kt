@@ -5,8 +5,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.newspulse.breakingnews.domain.model.BreakingNewsList
 import com.example.newspulse.breakingnews.domain.usecase.CacheBreakingNewsUseCase
+import com.example.newspulse.breakingnews.domain.usecase.ClearAllBreakingNewsUseCase
 import com.example.newspulse.breakingnews.domain.usecase.GetBreakingNewsUseCase
+import com.example.newspulse.breakingnews.presentation.NetworkHelper
 import com.example.newspulse.core.domain.Constants
 import com.example.newspulse.core.domain.util.Result
 import com.example.newspulse.core.presentaion.ui.asUiText
@@ -17,10 +20,11 @@ import kotlinx.coroutines.launch
 class BreakingNewsViewModel(
     private val cacheBreakingNewsUseCase: CacheBreakingNewsUseCase,
     private val getBreakingNewsUseCase: GetBreakingNewsUseCase,
+    private val clearAllBreakingNewsUseCase: ClearAllBreakingNewsUseCase,
+    private val networkHelper: NetworkHelper
 ):ViewModel() {
 
     var currentPage = Constants.FIRST_BREAKING_NEWS_PAGE
-        private set
 
     private var eventChannel = Channel<BreakingNewsEvent>()
     val event = eventChannel.receiveAsFlow()
@@ -67,6 +71,13 @@ class BreakingNewsViewModel(
     private fun getFirstRequest(){
         if(state.isLoading) return // Prevent multiple requests
 
+        if(networkHelper.isInternetAvailable()){
+            viewModelScope.launch {
+                clearAllBreakingNewsUseCase()
+            }
+            state = state.copy(breakingNews = BreakingNewsList(emptyList()))
+        }
+
         currentPage = Constants.FIRST_BREAKING_NEWS_PAGE
         state = state.copy(isLoading = true, isLastPage = false)
         getBrakingNews()
@@ -75,12 +86,21 @@ class BreakingNewsViewModel(
     private fun getMorePages(){
         if(state.isLoadingMore) return // Prevent multiple requests
 
-        state = state.copy(isLoadingMore = true)
-        getBrakingNews()
+        if(networkHelper.isInternetAvailable()){
+            state = state.copy(isLoadingMore = true)
+            getBrakingNews()
+        }
     }
 
     private fun getRefreshRequest(){
         if(state.isRefreshing) return // Prevent multiple requests
+
+        if(networkHelper.isInternetAvailable()){
+            viewModelScope.launch {
+                clearAllBreakingNewsUseCase()
+            }
+            state = state.copy(breakingNews = BreakingNewsList(emptyList()))
+        }
 
         currentPage = Constants.FIRST_BREAKING_NEWS_PAGE
         state = state.copy(isRefreshing = true, isLastPage = false)
@@ -89,35 +109,55 @@ class BreakingNewsViewModel(
 
     private fun getBrakingNews(){
         viewModelScope.launch {
-
-            val cashedResult = cacheBreakingNewsUseCase(
+            val cachingResult = cacheBreakingNewsUseCase(
                 country = state.country,
                 category = state.category,
                 pageSize = state.pageSize.toInt(),
                 page = currentPage,
             )
 
-            when(cashedResult){
+            val cashedResult = getBreakingNewsUseCase(state.pageSize.toInt(),currentPage)
+
+            when(cachingResult){
                 is Result.Error -> {
-                    eventChannel.send(BreakingNewsEvent.Error(cashedResult.error.asUiText()))
-                }
-                is Result.Success -> {
-                    val result = getBreakingNewsUseCase()
-                    when(result){
+                    eventChannel.send(BreakingNewsEvent.Error(cachingResult.error.asUiText()))
+                    when(cashedResult){
                         is Result.Error -> {
-                            eventChannel.send(BreakingNewsEvent.Error(result.error.asUiText()))
+                            eventChannel.send(BreakingNewsEvent.Error(cashedResult.error.asUiText()))
                         }
                         is Result.Success -> {
-                            state = state.copy(isLastPage = result.data.articles.isEmpty())
+                            state = state.copy(isLastPage = cashedResult.data.articles.isEmpty())
 
                             state = if(state.isRefreshing || state.isLoading){
                                 state.copy(
-                                    breakingNews = result.data
+                                    breakingNews = cashedResult.data
                                 )
                             } else{
                                 state.copy(
                                     breakingNews = state.breakingNews.copy(
-                                        articles = state.breakingNews.articles + result.data.articles
+                                        articles = state.breakingNews.articles + cashedResult.data.articles
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+                is Result.Success -> {
+                    when(cashedResult){
+                        is Result.Error -> {
+                            eventChannel.send(BreakingNewsEvent.Error(cashedResult.error.asUiText()))
+                        }
+                        is Result.Success -> {
+                            state = state.copy(isLastPage = cashedResult.data.articles.isEmpty())
+
+                            state = if(state.isRefreshing || state.isLoading){
+                                state.copy(
+                                    breakingNews = cashedResult.data
+                                )
+                            } else{
+                                state.copy(
+                                    breakingNews = state.breakingNews.copy(
+                                        articles = state.breakingNews.articles + cashedResult.data.articles
                                     )
                                 )
                             }
@@ -131,9 +171,6 @@ class BreakingNewsViewModel(
                     }
                 }
             }
-
-
-
             state = state.copy(isLoading = false, isLoadingMore = false, isRefreshing = false)
         }
     }

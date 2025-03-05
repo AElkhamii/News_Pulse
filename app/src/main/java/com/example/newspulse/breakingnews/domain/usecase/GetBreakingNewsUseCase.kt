@@ -8,8 +8,9 @@ import com.example.newspulse.core.domain.util.Result
 class GetBreakingNewsUseCase (
     private val repo: BreakingNewsRepository,
 ) {
-    suspend operator fun invoke(): Result<BreakingNewsList,DataError> {
-        val result = repo.getCachedBreakingNewsList()
+    suspend operator fun invoke(pageSize: Int, page: Int): Result<BreakingNewsList,DataError> {
+        val offset = (page - 1) * pageSize
+        val result = repo.getCachedBreakingNewsList(pageSize, offset)
         return when(result){
             is Result.Error -> Result.Error(result.error)
             is Result.Success -> Result.Success(BreakingNewsList(result.data))

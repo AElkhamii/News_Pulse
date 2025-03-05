@@ -28,36 +28,30 @@ class BreakingNewsRepositoryImp(
     }
 
     override suspend fun cacheBreakingNewsList(country: String, category: String, pageSize: Int, page: Int): EmptyResult<DataError> {
-        val clearResult = clearAllBreakingNewsEntity()
-         when(clearResult){
-            is Result.Error -> {return Result.Error(clearResult.error)}
+        val remoteResult = getRemoteBreakingNewsResponse(country, category, pageSize, page)
+        return when (remoteResult) {
+            is Result.Error -> Result.Error(remoteResult.error) // Handles network errors
             is Result.Success -> {
-                val remoteResult = getRemoteBreakingNewsResponse(country, category, pageSize, page)
-                return when (remoteResult) {
-                    is Result.Error -> Result.Error(remoteResult.error) // Handles network errors
-                    is Result.Success -> {
-                        try {
-                            breakingNewsListDao.insertBreakingNewsEntities(remoteResult.data.articleResponses?.map { it.toBreakingNewsArticleEntity() } ?: emptyList())
-                            Result.Success(Unit)
-                        } catch (e: SQLiteFullException) {
-                            Result.Error(DataError.Local.DISK_IS_FULL)
-                        }
-                        catch (e: SQLiteException) {
-                            Result.Error(DataError.Local.DATA_CORRUPTED)
-                        } catch (e: SecurityException) {
-                            Result.Error(DataError.Local.UNAUTHORIZED_ACCESS)
-                        } catch (e: Exception) {
-                            Result.Error(DataError.Local.DATABASE_FAILURE)
-                        }
-                    }
+                try {
+                    breakingNewsListDao.insertBreakingNewsEntities(remoteResult.data.articles?.map { it.toBreakingNewsArticleEntity() } ?: emptyList())
+                    Result.Success(Unit)
+                } catch (e: SQLiteFullException) {
+                    Result.Error(DataError.Local.DISK_IS_FULL)
+                }
+                catch (e: SQLiteException) {
+                    Result.Error(DataError.Local.DATA_CORRUPTED)
+                } catch (e: SecurityException) {
+                    Result.Error(DataError.Local.UNAUTHORIZED_ACCESS)
+                } catch (e: Exception) {
+                    Result.Error(DataError.Local.DATABASE_FAILURE)
                 }
             }
         }
     }
 
-    override suspend fun getCachedBreakingNewsList(): Result<List<BreakingNewsArticle>,DataError.Local> {
+    override suspend fun getCachedBreakingNewsList(pageSize: Int, offset: Int): Result<List<BreakingNewsArticle>,DataError.Local> {
         return try {
-            val cachedBreakingNews = breakingNewsListDao.getBreakingNewsEntities().map { it.toBreakingNewsArticle() }
+            val cachedBreakingNews = breakingNewsListDao.getBreakingNewsEntities(pageSize, offset).map { it.toBreakingNewsArticle() }
             if (cachedBreakingNews.isNotEmpty()) {
                 Result.Success(cachedBreakingNews)
             } else {

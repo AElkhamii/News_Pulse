@@ -1,5 +1,6 @@
 package com.example.newspulse.app
 
+import android.net.Uri
 import com.example.newspulse.breakingnews.presentation.breakingnews_list.BreakingNewsScreenRoot
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Icon
@@ -17,6 +18,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import com.example.newspulse.breakingnews.presentation.article_web_viewer.WebViewWithBackHandler
 import com.example.newspulse.core.presentaion.designsystem.theme.Dimensions
 import com.example.newspulse.core.presentaion.designsystem.theme.LocalDimensions
 import com.example.newspulse.core.presentaion.designsystem.theme.Navigation_News
@@ -37,13 +39,24 @@ fun NewsPulseNavigationRoot(
     }
 }
 
-private fun NavGraphBuilder.bottomNavGraph(navController: NavHostController){
-    navigation(
-        route = "start",
-        startDestination = "news"
-    ){
-        composable(route = "news"){ BreakingNewsScreenRoot(navController = navController) }
-        composable(route = "web"){ Text(text = "web")}
+    private fun NavGraphBuilder.bottomNavGraph(navController: NavHostController){
+        navigation(
+            route = "start",
+            startDestination = "news"
+        ){
+            composable(route = "news"){ BreakingNewsScreenRoot(navController = navController) }
+            composable(route = "web/{url}") { backStackEntry ->
+                val url = backStackEntry.arguments?.getString("url")?.let { Uri.decode(it) } ?: ""
+                WebViewWithBackHandler(
+                    url = url,
+                    modifier = Modifier,
+                    onBackPressed = {
+                        navController.popBackStack()
+                    },
+                    navController = navController,
+                    dimensions = LocalDimensions.current,
+                )
+            }
 
         composable(route = "save"){Text(text = "save")}
         composable(route = "search"){Text(text = "search")}

@@ -30,48 +30,18 @@ class CacheBreakingNewsUseCaseTest {
 
     // Given when then
     @Test
-    fun `getBreakingNewsResponse on success should return BreakNewsList`() = runTest{
+    fun `cacheBreakingNewsResponse on success should return EmptyList`() = runTest{
         //Arrange
         //->Parameters Initialization
         val country = "us"
         val category = "general"
         val pageSize = 20
         val page = 1
-        //remote result
-        val remoteArticleResponses = listOf(
-            ArticleResponse(
-                title = "Breaking: Major Event Happening Now!",
-                description = "Breaking: Major Event Happening Now!",
-                urlToImage = "https://www.example.com/image.jpg",
-                sourceResponse = Source("MBC", "News Pulse"),
-                publishedAt = "2025-02-18T12:00:00Z",
-                author = "John Doe",
-                urlToArticle = "https://www.example.com/article",
-                content = "MBC",
-            )
-        )
-        val stubRemoteBreakingNewsResponse = BreakingNewsResponse(
-            articleResponses = remoteArticleResponses,
-            totalResult = 1,
-            status = "ok"
-        )
-        // Expected result
-        val article = listOf(
-            BreakingNewsArticle(
-                sourceName = "News Pulse",
-                author = "John Doe",
-                title = "Breaking: Major Event Happening Now!",
-                description = "Breaking: Major Event Happening Now!",
-                url = "https://www.example.com/article",
-                urlToImage = "https://www.example.com/image.jpg",
-                publishedAt = "2025-02-18T12:00:00Z"
-            )
-        )
-        val stubBreakingNewsList = BreakingNewsList(article)
-        val expectedResult = Result.Success(stubBreakingNewsList)
+
+        val expectedResult = Result.Success(Unit)
 
         //-> Mocking -- every for non coroutine function
-        coEvery { repo.getRemoteBreakingNewsResponse(country,category,pageSize,page) } returns Result.Success(stubRemoteBreakingNewsResponse)
+        coEvery { repo.cacheBreakingNewsList(country,category,pageSize,page) } returns Result.Success(Unit)
 
         //Act
         val actualResult = cacheBreakingNewsUseCase(country,category,pageSize,page)
@@ -80,14 +50,15 @@ class CacheBreakingNewsUseCaseTest {
         assertEquals(expectedResult, actualResult)
     }
 
+
     @Test
-    fun `getBreakingNewsResponse on error should return BreakNewsList`() = runTest{
+    fun `cacheBreakingNewsResponse on success should return Error`() = runTest{
         val country = "us"
         val category = "general"
         val pageSize = 20
         val page = 1
 
-        coEvery { repo.getRemoteBreakingNewsResponse(country,category,pageSize,page) } returns Result.Error(DataError.Network.UNKNOWN)
+        coEvery { repo.cacheBreakingNewsList(country,category,pageSize,page) } returns Result.Error(DataError.Network.UNKNOWN)
 
         val actualResult = cacheBreakingNewsUseCase(country,category,pageSize,page)
 
