@@ -1,10 +1,5 @@
 package com.example.newspulse.breakingnews.domain.usecase
 
-import com.example.newspulse.breakingnews.data.remote.ArticleResponse
-import com.example.newspulse.breakingnews.data.remote.BreakingNewsResponse
-import com.example.newspulse.breakingnews.data.remote.Source
-import com.example.newspulse.breakingnews.domain.model.BreakingNewsArticle
-import com.example.newspulse.breakingnews.domain.model.BreakingNewsList
 import com.example.newspulse.breakingnews.domain.repo.BreakingNewsRepository
 import com.example.newspulse.core.domain.errorwrapper.DataError
 import com.example.newspulse.core.domain.util.Result
