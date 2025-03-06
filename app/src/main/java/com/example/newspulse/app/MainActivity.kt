@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.navigation.compose.rememberNavController
+import com.example.newspulse.app.navigation.NewsPulseNavigationRoot
 import com.example.newspulse.core.presentaion.designsystem.theme.NewsPulseTheme
 
 

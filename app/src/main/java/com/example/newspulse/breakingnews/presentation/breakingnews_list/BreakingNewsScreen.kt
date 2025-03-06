@@ -41,7 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
-import com.example.newspulse.app.BottomNavigationBar
+import com.example.newspulse.app.navigation.BottomNavigationBar
 import com.example.newspulse.breakingnews.domain.model.BreakingNewsArticle
 import com.example.newspulse.breakingnews.presentation.NetworkMonitor
 import com.example.newspulse.core.presentaion.designsystem.components.NewsPulseBackground

@@ -25,7 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.navigation.NavHostController
-import com.example.newspulse.app.BottomNavigationBar
+import com.example.newspulse.app.navigation.BottomNavigationBar
 import com.example.newspulse.core.presentaion.designsystem.theme.Dimensions
 
 @Composable

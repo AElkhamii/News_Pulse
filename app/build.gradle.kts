@@ -99,6 +99,7 @@ dependencies {
 
     // Destination
     implementation(libs.compose.destinations)
+
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.junit.jupiter)
