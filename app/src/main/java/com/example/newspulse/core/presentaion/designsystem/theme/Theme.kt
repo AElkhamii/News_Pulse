@@ -11,17 +11,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = NewsPulseAqua,
-    secondary = NewsPulseGray,
-    tertiary = NewsPulseDarkGray,
-    onBackground = NewsPulseBlack
+    primary = NewsPulsePrimaryLight,
+    secondary = NewsPulseSecondaryLight,
+    tertiary = NewsPulseTertiaryLight,
+    onBackground = NewsPulseOnBackgroundLight
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = NewsPulseAqua,
-    secondary = NewsPulseGray,
-    tertiary = NewsPulseDarkGray,
-    onBackground = NewsPulseWhite
+    primary = NewsPulsePrimaryDark,
+    secondary = NewsPulseSecondaryDark,
+    tertiary = NewsPulseTertiaryDark,
+    onBackground = NewsPulseOnBackgroundDark
 )
 
 @Composable

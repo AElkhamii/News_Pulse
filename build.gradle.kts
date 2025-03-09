@@ -8,4 +8,5 @@ plugins {
     alias(libs.plugins.junit5) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.room) apply false
+    alias(libs.plugins.android.library) apply false
 }
